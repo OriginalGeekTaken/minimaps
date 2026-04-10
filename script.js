@@ -53,24 +53,8 @@ function getCurrentMapName() {
   return minimaps[state.currentIndex];
 }
 
-function sanitizeUsername(value) {
-  const sanitized = value
-    .trim()
-    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^\.+|\.+$/g, "")
-    .slice(0, 40);
-
-  if (!sanitized) {
-    return "";
-  }
-
-  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(sanitized)) {
-    return `user-${sanitized}`;
-  }
-
-  return sanitized;
+function getUsername(value) {
+  return value.trim();
 }
 
 function renderSidebar() {
@@ -346,8 +330,8 @@ async function saveAsZip(folderName, files) {
 }
 
 async function submitExport() {
-  const sanitized = sanitizeUsername(elements.usernameInput.value);
-  if (!sanitized) {
+  const username = getUsername(elements.usernameInput.value);
+  if (!username) {
     return;
   }
 
@@ -359,12 +343,12 @@ async function submitExport() {
 
     if ("showDirectoryPicker" in window) {
       elements.submitStatus.textContent = "Choose a parent folder for the export.";
-      await saveWithFileSystemAccess(sanitized, files);
-      elements.submitStatus.textContent = `Saved "${sanitized}" with ${files.length - 1} annotated images and placements.json.`;
+      await saveWithFileSystemAccess(username, files);
+      elements.submitStatus.textContent = `Saved "${username}" with ${files.length - 1} annotated images and placements.json.`;
     } else {
       elements.submitStatus.textContent = "Saving a zip download because direct folder export is not available in this browser.";
-      await saveAsZip(sanitized, files);
-      elements.submitStatus.textContent = `Downloaded ${sanitized}.zip with all annotated minimaps.`;
+      await saveAsZip(username, files);
+      elements.submitStatus.textContent = `Downloaded ${username}.zip with all annotated minimaps.`;
     }
   } catch (error) {
     if (error && error.name === "AbortError") {
@@ -373,7 +357,7 @@ async function submitExport() {
       elements.submitStatus.textContent = `Export failed: ${error.message}`;
     }
   } finally {
-    elements.submitButton.disabled = !sanitizeUsername(elements.usernameInput.value);
+    elements.submitButton.disabled = !getUsername(elements.usernameInput.value);
   }
 }
 
@@ -406,11 +390,11 @@ elements.backToMaps.addEventListener("click", () => {
 });
 
 elements.usernameInput.addEventListener("input", () => {
-  const sanitized = sanitizeUsername(elements.usernameInput.value);
-  elements.sanitizedPreview.textContent = sanitized
-    ? `Folder name preview: ${sanitized}`
+  const username = getUsername(elements.usernameInput.value);
+  elements.sanitizedPreview.textContent = username
+    ? `Folder name preview: ${username}`
     : "Folder name preview: waiting for input";
-  elements.submitButton.disabled = !sanitized;
+  elements.submitButton.disabled = !username;
   elements.submitStatus.textContent = "";
 });
 
