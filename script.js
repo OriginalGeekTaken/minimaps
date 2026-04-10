@@ -96,9 +96,7 @@ function renderSidebar() {
     finalItem.classList.add("active");
   }
   finalItem.addEventListener("click", () => {
-    if (allMapsComplete()) {
-      showFinalScreen();
-    }
+    showFinalScreen();
   });
   elements.mapList.appendChild(finalItem);
 }
